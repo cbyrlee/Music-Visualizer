@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/Shadow/Downloads/music_visualizer_local_3.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Visualizer - Local Files</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #bgGradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            z-index: 0;
+        }
+
+        #visualizer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        #artistBackground {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 60%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 1;
+            filter: blur(20px);
+        }
+
+        #content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 500px 1fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        #leftPanel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        #albumArt {
+            width: 500px;
+            height: 500px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #albumArt img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #albumArt .placeholder {
+            font-size: 80px;
+            opacity: 0.3;
+        }
+
+        #songInfo {
+            background: rgba(0,0,0,0.4);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #songInfo h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        #songInfo h2 {
+            font-size: 24px;
+            opacity: 0.8;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        #songInfo .metadata {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        #songInfo .metadata p {
+            opacity: 0.6;
+            font-size: 14px;
+        }
+
+        #rightPanel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        #lyrics {
+            background: rgba(0,0,0,0.4);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            min-height: 300px;
+            line-height: 2;
+            font-size: 16px;
+        }
+
+        #lyrics h3 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            opacity: 0.9;
+        }
+
+        #artistInfo {
+            background: rgba(0,0,0,0.4);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #artistInfo h3 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        #artistBio {
+            line-height: 1.6;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        #artistLinks {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        #artistLinks a {
+            color: #64b5f6;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(100, 181, 246, 0.1);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        #artistLinks a:hover {
+            background: rgba(100, 181, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            padding: 20px 40px;
+            border-radius: 50px;
+            backdrop-filter: blur(20px);
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        button {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.05);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #progress {
+            width: 350px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        #progressBar {
+            height: 100%;
+            background: linear-gradient(90deg, #64b5f6, #42a5f5);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        #timeDisplay {
+            min-width: 110px;
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.5;
+            font-style: italic;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="bgGradient"></div>
+    <canvas id="visualizer" width="1648" height="950"></canvas>
+    <div id="artistBackground"></div>
+    
+    <div id="content">
+        <div id="leftPanel">
+            <div id="albumArt">
+                <div class="placeholder">♫</div>
+            </div>
+            <div id="songInfo">
+                <h1 id="title">No Song Playing</h1>
+                <h2 id="artist">Load music files to begin</h2>
+                <div class="metadata">
+                    <p id="album"></p>
+                    <p id="year"></p>
+                    <p id="genre"></p>
+                    <p id="trackNum"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="rightPanel">
+            <div id="lyrics">
+                <h3>Lyrics</h3>
+                <div class="loading">Lyrics will appear when a song is playing</div>
+            </div>
+            <div id="artistInfo">
+                <h3>Artist Info</h3>
+                <div id="artistBio" class="loading">Artist information will appear here</div>
+                <div id="artistLinks"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls">
+        <input type="file" id="fileInput" accept="audio/*" multiple="">
+        <button onclick="document.getElementById(&#39;fileInput&#39;).click()">📁 Load Music</button>
+        <button id="prevBtn" onclick="previousTrack()">⏮️</button>
+        <button id="playPauseBtn" onclick="togglePlayPause()">▶️ Play</button>
+        <button id="nextBtn" onclick="nextTrack()">⏭️</button>
+        <div id="progress" onclick="seek(event)">
+            <div id="progressBar"></div>
+        </div>
+        <div id="timeDisplay">0:00 / 0:00</div>
+    </div>
+
+    <audio id="audio"></audio>
+
+    <script src="./Music Visualizer - Local Files_files/jsmediatags.min.js.download"></script>
+    <script>
+        const audio = document.getElementById('audio');
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        
+        let audioContext, analyser, source, dataArray;
+        let playlist = [];
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            playlist = Array.from(e.target.files);
+            if (playlist.length > 0) {
+                currentTrackIndex = 0;
+                loadTrack(playlist[currentTrackIndex]);
+            }
+        });
+
+        function loadTrack(file) {
+            const url = URL.createObjectURL(file);
+            audio.src = url;
+
+            jsmediatags.read(file, {
+                onSuccess: function(tag) {
+                    const tags = tag.tags;
+                    
+                    document.getElementById('title').textContent = tags.title || file.name.replace(/\.[^/.]+$/, "");
+                    document.getElementById('artist').textContent = tags.artist || 'Unknown Artist';
+                    document.getElementById('album').textContent = tags.album ? `📀 ${tags.album}` : '';
+                    document.getElementById('year').textContent = tags.year ? `📅 ${tags.year}` : '';
+                    document.getElementById('genre').textContent = tags.genre ? `🎵 ${tags.genre}` : '';
+                    document.getElementById('trackNum').textContent = tags.track ? `#${tags.track}` : '';
+
+                    if (tags.picture) {
+                        const picture = tags.picture;
+                        const base64String = picture.data.reduce((data, byte) => data + String.fromCharCode(byte), '');
+                        const imgUrl = `data:${picture.format};base64,${window.btoa(base64String)}`;
+                        document.getElementById('albumArt').innerHTML = `<img src="${imgUrl}" alt="Album Art">`;
+                    } else {
+                        document.getElementById('albumArt').innerHTML = '<div class="placeholder">♫</div>';
+                    }
+
+                    if (tags.artist && tags.title) {
+                        fetchLyrics(tags.artist, tags.title);
+                        fetchArtistInfo(tags.artist);
+                    }
+                },
+                onError: function(error) {
+                    console.log('Error reading tags:', error);
+                    document.getElementById('title').textContent = file.name.replace(/\.[^/.]+$/, "");
+                    document.getElementById('artist').textContent = 'Unknown Artist';
+                }
+            });
+
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 512;
+                source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                draw();
+            }
+        }
+
+        function togglePlayPause() {
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('playPauseBtn').textContent = '⏸️ Pause';
+                isPlaying = true;
+            } else {
+                audio.pause();
+                document.getElementById('playPauseBtn').textContent = '▶️ Play';
+                isPlaying = false;
+            }
+        }
+
+        function nextTrack() {
+            if (playlist.length === 0) return;
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(playlist[currentTrackIndex]);
+            if (isPlaying) audio.play();
+        }
+
+        function previousTrack() {
+            if (playlist.length === 0) return;
+            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(playlist[currentTrackIndex]);
+            if (isPlaying) audio.play();
+        }
+
+        function seek(e) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percentage = x / rect.width;
+            audio.currentTime = percentage * audio.duration;
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            const current = formatTime(audio.currentTime);
+            const duration = formatTime(audio.duration);
+            document.getElementById('timeDisplay').textContent = `${current} / ${duration}`;
+            
+            const progress = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        });
+
+        audio.addEventListener('ended', nextTrack);
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function fetchLyrics(artist, title) {
+            const lyricsDiv = document.getElementById('lyrics');
+            lyricsDiv.innerHTML = '<h3>Lyrics</h3><div class="loading">Searching for lyrics...</div>';
+            
+            try {
+                const response = await fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`);
+                const data = await response.json();
+                
+                if (data.lyrics) {
+                    lyricsDiv.innerHTML = `<h3>Lyrics</h3><pre style="white-space: pre-wrap; font-family: inherit; opacity: 0.9;">${data.lyrics}</pre>`;
+                } else {
+                    lyricsDiv.innerHTML = '<h3>Lyrics</h3><div class="loading">Lyrics not found</div>';
+                }
+            } catch (error) {
+                lyricsDiv.innerHTML = '<h3>Lyrics</h3><div class="loading">Could not load lyrics</div>';
+            }
+        }
+
+        async function fetchArtistInfo(artist) {
+            const bioDiv = document.getElementById('artistBio');
+            const linksDiv = document.getElementById('artistLinks');
+            bioDiv.innerHTML = '<div class="loading">Loading artist info...</div>';
+            linksDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(artist)}&api_key=YOUR_LASTFM_API_KEY&format=json`);
+                const data = await response.json();
+                
+                if (data.artist) {
+                    const artist = data.artist;
+                    let bio = artist.bio?.summary || 'No biography available';
+                    bio = bio.replace(/<a[^>]*>.*?<\/a>/gi, '');
+                    bioDiv.innerHTML = bio;
+                    
+                    linksDiv.innerHTML = `
+                        <a href="${artist.url}" target="_blank">Last.fm Page</a>
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(artist.name)}" target="_blank">YouTube</a>
+                        <a href="https://open.spotify.com/search/${encodeURIComponent(artist.name)}" target="_blank">Spotify</a>
+                    `;
+                    
+                    if (artist.image && artist.image.length > 0) {
+                        const bgImage = artist.image[artist.image.length - 1]['#text'];
+                        if (bgImage) {
+                            document.getElementById('artistBackground').style.backgroundImage = `url(${bgImage})`;
+                        }
+                    }
+                } else {
+                    bioDiv.innerHTML = 'Artist information not available';
+                }
+            } catch (error) {
+                bioDiv.innerHTML = 'Could not load artist information';
+            }
+        }
+
+        // Particle system
+        let particles = [];
+        let lightningFlash = 0;
+        let nextLightningTime = Date.now() + Math.random() * 5000 + 2000; // Random 2-7 seconds
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.size = Math.random() * 3 + 1;
+                this.hue = Math.random() * 360;
+                this.life = 1;
+                this.decay = Math.random() * 0.01 + 0.005;
+            }
+            
+            update(intensity) {
+                this.x += this.vx * intensity;
+                this.y += this.vy * intensity;
+                this.life -= this.decay;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, ${this.life})`;
+                ctx.fill();
+                
+                // Glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = `hsla(${this.hue}, 80%, 60%, ${this.life})`;
+            }
+        }
+
+        function draw() {
+            requestAnimationFrame(draw);
+            
+            if (!analyser) return;
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Calculate average intensity
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+            }
+            const avgIntensity = sum / dataArray.length / 255;
+            
+            // Random lightning flash effect like a storm
+            const now = Date.now();
+            if (now >= nextLightningTime && lightningFlash === 0) {
+                lightningFlash = Math.random() * 0.4 + 0.3; // Bright flash
+                // Set next random lightning time (2-7 seconds from now)
+                nextLightningTime = now + Math.random() * 5000 + 2000;
+            }
+            
+            // Fade background with lightning flash overlay
+            ctx.fillStyle = `rgba(0, 0, 0, ${0.1 - lightningFlash})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Lightning flash color overlay
+            if (lightningFlash > 0) {
+                const flashHue = Math.random() * 60 + 180; // Blues and purples
+                ctx.fillStyle = `hsla(${flashHue}, 80%, 60%, ${lightningFlash})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                lightningFlash *= 0.85; // Fade out quickly
+            }
+            
+            // Spawn new particles based on intensity
+            if (avgIntensity > 0.1 && particles.length < 300) {
+                for (let i = 0; i < Math.floor(avgIntensity * 10); i++) {
+                    particles.push(new Particle());
+                }
+            }
+            
+            // Update and draw particles
+            ctx.shadowBlur = 0;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update(avgIntensity * 2);
+                particles[i].draw();
+                
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+    </script>
+
+
+</body></html>
